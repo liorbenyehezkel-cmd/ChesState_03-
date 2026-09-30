@@ -209,3 +209,96 @@ drop trigger if exists entrepreneur_applications_touch_updated_at
 create trigger entrepreneur_applications_touch_updated_at
   before update on public.entrepreneur_applications
   for each row execute function public.touch_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- Registrations + messages (with sample data)
+--
+-- public.registrations is the site's signup log (see registrations.sql for its
+-- RLS / grants). Created here only if missing, so re-running is safe.
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.registrations (
+  id                     uuid primary key default gen_random_uuid(),
+  created_at             timestamptz not null default now(),
+  email                  text not null,
+  phone                  text,
+  country                text,
+  source                 text,      -- referral: LinkedIn, Instagram, Google, Direct, ...
+  locale                 text,
+  try_to_make_a_purchase boolean not null default false,
+  purchase_amount        numeric(14, 2),
+  purchase_currency      text,      -- 'USDC' or a fiat code such as 'USD', 'ILS', 'EUR'
+  project_title          text,
+  message                text,
+
+  constraint purchase_amount_non_negative
+    check (purchase_amount is null or purchase_amount >= 0)
+);
+
+alter table public.registrations
+  add column if not exists source text,
+  add column if not exists locale text,
+  add column if not exists project_title text,
+  add column if not exists message text,
+  add column if not exists purchase_currency text;
+
+create unique index if not exists registrations_email_lower_idx
+  on public.registrations (lower(email));
+
+-- Entrepreneur submission requests and customer-service texts. Service-role
+-- only: RLS on with no policies.
+create table if not exists public.registration_messages (
+  id              uuid primary key default gen_random_uuid(),
+  registration_id uuid not null references public.registrations (id) on delete cascade,
+  kind            text not null check (kind in ('entrepreneur_submission', 'customer_service')),
+  body            text not null,
+  created_at      timestamptz not null default now()
+);
+
+alter table public.registration_messages enable row level security;
+
+create index if not exists registration_messages_registration_id_idx
+  on public.registration_messages (registration_id, created_at);
+
+-- Sample data: 10 registrations. Safe to re-run (skips existing emails).
+insert into public.registrations
+  (created_at, email, phone, country, source, locale, try_to_make_a_purchase, purchase_amount, purchase_currency, project_title)
+select v.created_at::timestamptz, v.email, v.phone, v.country, v.source, v.locale, v.intent, v.amount, v.currency, v.project_title
+from (values
+  ('2026-08-01 09:14+00', 'dana.levi@example.com',     '+972-52-555-0101', 'Israel',         'LinkedIn',  'he', true,  25000.00, 'USDC', null),
+  ('2026-08-03 13:40+00', 'mark.owens@example.com',    '+1-415-555-0102',  'United States',  'Google',    'en', true,  50000.00, 'USD',  null),
+  ('2026-08-05 18:22+00', 'sofia.rossi@example.com',   '+39-333-555-0103', 'Italy',          'Instagram', 'en', false, null,     null,   null),
+  ('2026-08-09 07:55+00', 'yossi.cohen@example.com',   '+972-54-555-0104', 'Israel',         'Direct',    'he', true,  10000.00, 'ILS',  null),
+  ('2026-08-12 21:03+00', 'amelie.durand@example.com', '+33-6-55-55-0105', 'France',         'LinkedIn',  'en', true,  15000.00, 'EUR',  null),
+  ('2026-08-15 11:30+00', 'omar.haddad@example.com',   '+971-50-555-0106', 'UAE',            'Google',    'en', true,  100000.00,'USDC', null),
+  ('2026-08-19 16:45+00', 'lena.fischer@example.com',  '+49-151-555-0107', 'Germany',        'Instagram', 'en', false, null,     null,   'Boutique hotel in Tel Aviv'),
+  ('2026-08-23 08:10+00', 'noam.baron@example.com',    '+972-50-555-0108', 'Israel',         'Direct',    'he', false, null,     null,   'Residential building, Haifa'),
+  ('2026-09-02 19:27+00', 'priya.nair@example.com',    '+44-7700-555-0109','United Kingdom', 'LinkedIn',  'en', true,  5000.00,  'USDC', null),
+  ('2026-09-10 12:05+00', 'carlos.mendez@example.com', '+34-612-555-0110', 'Spain',          'Google',    'en', true,  20000.00, 'USD',  null)
+) as v(created_at, email, phone, country, source, locale, intent, amount, currency, project_title)
+where not exists (
+  select 1 from public.registrations r where lower(r.email) = lower(v.email)
+);
+
+-- Sample messages: entrepreneur submissions and customer-service texts.
+insert into public.registration_messages (registration_id, kind, body, created_at)
+select r.id, m.kind, m.body, m.created_at::timestamptz
+from (values
+  ('lena.fischer@example.com', 'entrepreneur_submission',
+   'We are raising $2M to renovate a 24-room boutique hotel in Tel Aviv. Permits are approved; happy to share the full plan.', '2026-08-19 16:50+00'),
+  ('noam.baron@example.com', 'entrepreneur_submission',
+   'Six-storey residential building in Haifa, 18 units, construction starts Q4. Looking to tokenize 40% of the equity.', '2026-08-23 08:15+00'),
+  ('dana.levi@example.com', 'customer_service',
+   'Hi, how do I fund my purchase with USDC? Which network should I send it on?', '2026-08-01 09:30+00'),
+  ('mark.owens@example.com', 'customer_service',
+   'Do I need to complete KYC before I can wire USD?', '2026-08-03 14:05+00'),
+  ('omar.haddad@example.com', 'customer_service',
+   'I would like to discuss a larger allocation. Can someone call me?', '2026-08-15 11:45+00'),
+  ('priya.nair@example.com', 'customer_service',
+   'Is there a minimum purchase amount for the first project?', '2026-09-02 19:40+00')
+) as m(email, kind, body, created_at)
+join public.registrations r on lower(r.email) = lower(m.email)
+where not exists (
+  select 1 from public.registration_messages x
+  where x.registration_id = r.id and x.kind = m.kind and x.body = m.body
+);
