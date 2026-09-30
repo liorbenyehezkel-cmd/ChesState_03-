@@ -47,7 +47,7 @@ export const en: Dictionary = {
     subtitle:
       "the bureaucracy, the middlemen, and the millions it takes just to “get on the board”?",
     body: "ChesState is changing the way the world invests in real estate. Through smart contracts and fractional investing, gain access to income-generating properties in the world's hottest markets.",
-    highlight: "starting at just 9.99$!",
+    highlight: "Starting at just $9.99! Isn't CRAZY?!",
     statement: "Think ahead. Make your move. Change the game.",
   },
   faq: {
