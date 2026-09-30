@@ -222,6 +222,23 @@ export function InvestFlow({ project }: { project: Project }) {
           </div>
         </fieldset>
 
+        <div className="mt-5 flex gap-2.5 rounded-2xl border border-[#3EA88C]/20 bg-[#3EA88C]/[0.06] p-4">
+          <span aria-hidden="true" className="mt-0.5 shrink-0 text-[#3EA88C]">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M8 7v4M8 5.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </span>
+          <p className="font-sans text-[12px] leading-relaxed text-cream/70">
+            Your fiat is seamlessly converted to{" "}
+            <span className="font-medium text-cream">USDC</span> via our secure
+            on-ramp partners and locked directly into the property&apos;s{" "}
+            <span className="font-medium text-cream">smart contract escrow</span>.
+            Funds are auto-released to the entrepreneur when the raise target is
+            met, or auto-refunded to your embedded wallet if it isn&apos;t.
+          </p>
+        </div>
+
         {error && (
           <p role="alert" className="mt-3 font-sans text-[13px] text-[#F3B0A8]">
             {error}

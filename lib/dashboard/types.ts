@@ -105,12 +105,12 @@ export function formatShortDate(value: string) {
 export function investmentStatusLabel(status: InvestmentStatus) {
   switch (status) {
     case "pending":
-      return "Registered";
+      return "Pending · Smart Contract";
     case "locked":
-      return "Held";
+      return "Locked in Contract";
     case "confirmed":
-      return "Confirmed";
+      return "Active";
     case "refunded":
-      return "Returned";
+      return "Refunded";
   }
 }

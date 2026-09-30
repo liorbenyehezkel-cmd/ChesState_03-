@@ -15,6 +15,7 @@ import {
   recordInvestment,
   recordPayout,
   setRoleCookie,
+  submitKyc,
 } from "@/lib/dashboard/store";
 import type {
   DashboardState,
@@ -35,6 +36,13 @@ type DashboardContextValue = {
   }) => DashboardState;
   topUp: (amountUsd: number, method: PaymentMethod) => DashboardState;
   payout: (amountUsd: number, reference: string) => DashboardState;
+  kyc: (fields: {
+    fullName: string;
+    dateOfBirth: string;
+    nationality: string;
+    idType: string;
+    idNumber: string;
+  }) => DashboardState;
 };
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
@@ -84,9 +92,15 @@ export function DashboardProvider({
     [],
   );
 
+  const kyc = useCallback<DashboardContextValue["kyc"]>((fields) => {
+    const next = submitKyc(fields);
+    setState(next);
+    return next;
+  }, []);
+
   const value = useMemo(
-    () => ({ role, state, setRole, refresh, invest, topUp, payout }),
-    [role, state, setRole, refresh, invest, topUp, payout],
+    () => ({ role, state, setRole, refresh, invest, topUp, payout, kyc }),
+    [role, state, setRole, refresh, invest, topUp, payout, kyc],
   );
 
   return (

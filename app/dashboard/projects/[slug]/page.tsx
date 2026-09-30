@@ -64,11 +64,28 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
             <div className="mt-4 rounded-2xl border border-cream/10 p-4">
               <YieldBars data={project.yieldSeries} />
             </div>
-            <p className="mt-4 font-sans text-[12px] leading-relaxed text-cream/40">
-              Nothing on this page is a forecast. Real estate can lose money,
-              and a project can miss its dates. Read the Questions page on the
-              public site before you treat any figure as a plan.
-            </p>
+            <div className="mt-4 flex gap-3 rounded-2xl border border-gold/30 bg-gold/[0.06] p-4">
+              <span aria-hidden="true" className="mt-0.5 shrink-0 text-gold">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 2L14.928 14H1.072L8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                  <path d="M8 6v3.5M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </span>
+              <div className="space-y-1">
+                <p className="font-sans text-[13px] font-medium text-gold">
+                  These figures are future estimates, not guarantees.
+                </p>
+                <p className="font-sans text-[13px] leading-relaxed text-cream/65">
+                  All return figures shown are illustrative models based on historical
+                  UAE real estate data. They are not a forecast, a promise, or a
+                  financial target. Real estate can lose value, projects can miss
+                  their dates, and past market conditions do not predict future
+                  performance. Do not treat any figure on this page as a plan.
+                  Read the full risk disclosures on our public site before registering
+                  a request.
+                </p>
+              </div>
+            </div>
           </section>
 
           <section className="mt-10">

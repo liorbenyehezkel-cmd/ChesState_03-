@@ -8,6 +8,7 @@ import { Logo } from "@/components/ui/Logo";
 import { useDashboard } from "@/components/dashboard/DashboardProvider";
 import { cn } from "@/lib/cn";
 import { money, type UserRole } from "@/lib/dashboard/types";
+import { ToastStack } from "@/components/dashboard/ToastStack";
 
 const investorLinks = [
   { href: "/dashboard/account", label: "Account" },
@@ -32,6 +33,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const isEntrepreneur = role === "entrepreneur";
 
   return (
+    <ToastStack>
     <div
       data-role={role}
       className="dashboard-shell flex min-h-screen flex-col overflow-x-hidden bg-[#081424] text-cream"
@@ -150,6 +152,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
       </footer>
     </div>
+    </ToastStack>
   );
 }
 

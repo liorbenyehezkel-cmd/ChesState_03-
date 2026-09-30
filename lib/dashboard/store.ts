@@ -131,6 +131,25 @@ export function recordPayout(amountUsd: number, reference: string) {
   return state;
 }
 
+export function submitKyc(fields: {
+  fullName: string;
+  dateOfBirth: string;
+  nationality: string;
+  idType: string;
+  idNumber: string;
+}) {
+  const state = readRaw() ?? seed("investor");
+  state.profile.kycStatus = "pending";
+  state.activity.unshift({
+    id: `act_${Date.now().toString(36)}`,
+    label: "Identity verification submitted",
+    detail: `${fields.idType} · pending review`,
+    at: new Date().toISOString(),
+  });
+  persist(state);
+  return state;
+}
+
 export function setRoleCookie(role: UserRole) {
   document.cookie = `${ROLE_COOKIE}=${role}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 }

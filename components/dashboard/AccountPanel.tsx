@@ -15,6 +15,7 @@ import { loadContact, type SavedContact } from "@/lib/dashboard/contact";
 import { countryByIso, flagSrc } from "@/lib/phone";
 
 import { SITE_URL } from "@/lib/site";
+import { KycPanel } from "@/components/dashboard/KycPanel";
 
 const SHARE_TEXT =
   "Join me on ChesState — fractional access to vetted property projects in the UAE.";
@@ -237,6 +238,8 @@ export function AccountPanel() {
           Let&apos;s start investing to level up your account.
         </p>
       </section>
+
+      <KycPanel />
 
       <section className="space-y-4 rounded-2xl border border-cream/10 p-5 sm:p-6">
         <h2 className="font-serif text-[22px] text-cream">Share ChesState</h2>
