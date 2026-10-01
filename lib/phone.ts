@@ -219,3 +219,21 @@ export function countryByIso(iso: string | null | undefined) {
 export function flagSrc(iso: string) {
   return `https://flagcdn.com/w160/${iso.toLowerCase()}.png`;
 }
+
+/**
+ * Turns whatever a visitor typed into the national digits to append to a
+ * dial code: strips formatting, an already-typed "+972" / "00972" prefix, and
+ * the trunk-prefix zeros people add out of habit (e.g. 050… → 50…).
+ */
+export function nationalDigits(raw: string, dial: string) {
+  const typed = raw.trim();
+  let digits = typed.replace(/\D/g, "");
+  const dialDigits = dial.replace(/\D/g, "");
+
+  if (typed.startsWith("+") || typed.startsWith("00")) {
+    digits = digits.replace(/^00/, "");
+    if (digits.startsWith(dialDigits)) digits = digits.slice(dialDigits.length);
+  }
+
+  return digits.replace(/^0+/, "");
+}

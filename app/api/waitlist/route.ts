@@ -40,14 +40,14 @@ export async function POST(request: Request) {
 
   const { email, locale, phone, country, source } = payload;
 
-  if (typeof email !== "string" || !emailPattern.test(email)) {
+  const normalised = typeof email === "string" ? email.trim().toLowerCase() : "";
+
+  if (!emailPattern.test(normalised)) {
     return NextResponse.json(
       { error: "A valid email address is required" },
       { status: 400 },
     );
   }
-
-  const normalised = email.toLowerCase().trim();
   const arrivalSource =
     typeof source === "string" && source.trim() ? source.trim().slice(0, 80) : "Direct";
   const localeValue =
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
   const saved = await saveRegistration({
     email: normalised,
-    phone: typeof phone === "string" ? phone : null,
+    phone: typeof phone === "string" ? phone.trim() : null,
     country: typeof country === "string" ? country : null,
     source: arrivalSource,
     locale: localeValue,
@@ -75,8 +75,11 @@ export async function POST(request: Request) {
   }
 
   if (!saved.stored) {
-    console.error("[waitlist] insert failed:", saved.error);
-    return NextResponse.json({ error: "Could not save signup" }, { status: 500 });
+    console.error("[waitlist] insert failed:", saved.detail ?? saved.error);
+    return NextResponse.json(
+      { error: "Could not save signup", detail: saved.detail ?? saved.error },
+      { status: 500 },
+    );
   }
 
   await logPlatformEvent({

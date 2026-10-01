@@ -18,11 +18,19 @@ export function InvestGate() {
       const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, locale }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), locale }),
       });
-      if (!response.ok) throw new Error("failed");
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        console.error("[invest-gate] /api/waitlist failed:", {
+          status: response.status,
+          body,
+        });
+        throw new Error(`failed (${response.status})`);
+      }
       window.location.assign("/invest");
-    } catch {
+    } catch (error) {
+      console.error("[invest-gate] submit error:", error);
       setStatus("error");
     }
   }

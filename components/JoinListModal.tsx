@@ -6,7 +6,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { saveContact } from "@/lib/dashboard/contact";
 import { captureAttribution, recordLocalEvent } from "@/lib/attribution";
 import { useI18n } from "@/lib/i18n/provider";
-import { countries } from "@/lib/phone";
+import { countries, nationalDigits } from "@/lib/phone";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -83,8 +83,15 @@ export function JoinListModal({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const digits = phone.replace(/\D/g, "");
-    if (digits.length < 6 || !agreed) {
+    const country = countries.find((item) => item.iso === iso) ?? countries[0];
+    const cleanEmail = email.trim().toLowerCase();
+    const digits = nationalDigits(phone, country.dial);
+    if (!cleanEmail || digits.length < 5 || !agreed) {
+      console.error("[join-list] validation failed:", {
+        emailPresent: Boolean(cleanEmail),
+        phoneDigits: digits.length,
+        agreed,
+      });
       setStatus("error");
       return;
     }
@@ -92,29 +99,39 @@ export function JoinListModal({
     setStatus("submitting");
 
     try {
-      const country = countries.find((item) => item.iso === iso) ?? countries[0];
       const attribution = captureAttribution();
       const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          email: cleanEmail,
           locale,
           phone: `${country.dial}${digits}`,
           country: country.iso,
           source: attribution.source,
         }),
       });
-      if (!response.ok) throw new Error("Request failed");
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        console.error("[join-list] /api/waitlist failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: result,
+        });
+        throw new Error(`Request failed (${response.status})`);
+      }
+      if (result?.stored === false) {
+        console.warn("[join-list] signup was accepted but NOT stored:", result);
+      }
       saveContact({
-        email: email.trim(),
+        email: cleanEmail,
         iso: country.iso,
         dial: country.dial,
         phone: digits,
       });
       recordLocalEvent({
         type: "waitlist_join",
-        email: email.trim(),
+        email: cleanEmail,
         detail: {
           phone: `${country.dial}${digits}`,
           country: country.iso,
@@ -122,7 +139,8 @@ export function JoinListModal({
         },
       });
       window.location.assign("/dashboard/explore");
-    } catch {
+    } catch (error) {
+      console.error("[join-list] submit error:", error);
       setStatus("error");
     }
   }

@@ -50,7 +50,7 @@ function rlsBlocked(message: string, code?: string) {
 
 export async function saveRegistration(input: RegistrationInput) {
   const supabase = createPublicSupabase();
-  if (!supabase) return { stored: false as const, error: "not_configured" };
+  if (!supabase) return { stored: false as const, error: "not_configured", detail: null };
 
   let result = await supabase.from(REGISTRATIONS_TABLE).insert(fullRow(input));
   if (result.error && missingColumn(result.error.message)) {
@@ -58,14 +58,17 @@ export async function saveRegistration(input: RegistrationInput) {
   }
 
   if (result.error) {
-    const reason = rlsBlocked(result.error.message, result.error.code)
-      ? "rls"
-      : result.error.message;
-    console.warn("[registrations] save skipped:", result.error.message);
-    return { stored: false as const, error: reason };
+    const { message, code, details, hint } = result.error;
+    const reason = rlsBlocked(message, code) ? "rls" : message;
+    console.error("[registrations] insert failed:", { code, message, details, hint });
+    return {
+      stored: false as const,
+      error: reason,
+      detail: { code, message, details, hint },
+    };
   }
 
-  return { stored: true as const, error: null };
+  return { stored: true as const, error: null, detail: null };
 }
 
 export async function listRegistrations(limit = 500) {
