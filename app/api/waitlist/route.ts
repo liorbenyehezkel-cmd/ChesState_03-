@@ -76,8 +76,13 @@ export async function POST(request: Request) {
 
   if (!saved.stored) {
     console.error("[waitlist] insert failed:", saved.detail ?? saved.error);
+    // TEMPORARY DIAGNOSTIC: surfaces the exact database error to the browser.
+    // Revert to a generic message once the waitlist failure is understood.
     return NextResponse.json(
-      { error: "Could not save signup", detail: saved.detail ?? saved.error },
+      {
+        error: saved.detail?.message || saved.error || "Could not save signup",
+        detail: saved.detail ?? saved.error,
+      },
       { status: 500 },
     );
   }
