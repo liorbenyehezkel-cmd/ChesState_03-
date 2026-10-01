@@ -3,6 +3,7 @@ import { isLocale } from "@/lib/i18n/config";
 import { propertyTypeKeys } from "@/lib/i18n/types";
 import { logPlatformEvent } from "@/lib/legal/logEvent";
 import { SITE_URL } from "@/lib/site";
+import { createAdminSupabase, createServerSupabase } from "@/lib/supabase/server";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;

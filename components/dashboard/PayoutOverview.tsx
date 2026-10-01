@@ -141,7 +141,7 @@ export function PayoutOverview() {
             The entire pipeline — smart contract release, USDC→fiat conversion,
             and bank wire — is triggered automatically by the raise outcome. You
             do not need to log in, approve a transaction, or contact support.
-            ChesState's off-ramp bridge handles the full settlement on your behalf.
+            ChesState&apos;s off-ramp bridge handles the full settlement on your behalf.
           </p>
         </div>
       </section>
