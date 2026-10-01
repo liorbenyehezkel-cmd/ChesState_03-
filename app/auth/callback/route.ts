@@ -3,7 +3,13 @@ import { createServerSupabase } from "@/lib/supabase/server";
 
 /** Target of the confirmation link in the entrepreneur signup email. */
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  let parsed: URL;
+  try {
+    parsed = new URL(request.url);
+  } catch {
+    return new NextResponse(null, { status: 400 });
+  }
+  const { searchParams, origin } = parsed;
   const code = searchParams.get("code");
 
   if (code) {
