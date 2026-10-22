@@ -29,18 +29,14 @@ export default function PortfolioPage() {
   }, [openSlug, state.investments]);
 
   const project = openSlug ? projectBySlug(openSlug) : null;
-  const metrics = useMemo(
-    () => portfolioMetrics(state.investments),
+  // Only confirmed investments carry value; pending requests stay in Activity.
+  const confirmed = useMemo(
+    () => state.investments.filter((item) => item.status === "confirmed"),
     [state.investments],
   );
-  const chart = useMemo(
-    () => performanceSeries(state.investments),
-    [state.investments],
-  );
-  const holdings = useMemo(
-    () => allocationRows(state.investments),
-    [state.investments],
-  );
+  const metrics = useMemo(() => portfolioMetrics(confirmed), [confirmed]);
+  const chart = useMemo(() => performanceSeries(confirmed), [confirmed]);
+  const holdings = useMemo(() => allocationRows(confirmed), [confirmed]);
   const ledger = useMemo(
     () => ledgerRows(state.investments, state.activity).slice(0, 10),
     [state.activity, state.investments],
@@ -92,7 +88,7 @@ export default function PortfolioPage() {
         </div>
         <div className="relative mt-5">
           <PortfolioArea data={chart} />
-          {isEmpty ? (
+          {confirmed.length === 0 ? (
             <div className="pointer-events-none absolute inset-0 flex items-end justify-start pb-8 pe-4 ps-12 sm:ps-14">
               <div className="pointer-events-auto max-w-[36ch] dash-card px-4 py-3">
                 <p className="font-serif text-[18px] text-cream">No holdings yet</p>

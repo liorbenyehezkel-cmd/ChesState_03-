@@ -42,6 +42,13 @@ export const fr: Dictionary = {
     noWallet: "Aucun portefeuille crypto requis",
     vara: "Conçu pour le cadre VARA des EAU",
   },
+  explainer: {
+    eyebrow: "Regarder",
+    title: "ChesState en moins de 3 minutes",
+    subtitle:
+      "Découvrez qui nous sommes, comment fonctionne la plateforme et comment commencer à investir dans l'immobilier dès 9,99 $.",
+    videoLabel: "Vidéo de présentation de ChesState",
+  },
   howItWorks: {
     eyebrow: "Comment ça marche",
     title: "Lassé des règles du jeu immobilier d'autrefois.",

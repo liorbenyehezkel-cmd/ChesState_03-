@@ -4,6 +4,7 @@ import { YieldBars } from "@/components/dashboard/Charts";
 import { InvestFlow } from "@/components/dashboard/InvestFlow";
 import { ProjectCover } from "@/components/dashboard/ProjectCard";
 import { ProjectDescription } from "@/components/dashboard/ProjectDescription";
+import { cn } from "@/lib/cn";
 import { projectBySlug } from "@/lib/dashboard/projects";
 import { daysLeft, fundingPercent, money } from "@/lib/dashboard/types";
 
@@ -41,12 +42,17 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
           </h1>
           <ProjectDescription description={project.description} story={project.story} />
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Fact label="Raised" value={`${funded}%`} />
-            <Fact label="Target" value={money(project.targetAmount)} />
+            {/* Full-width first row on phones; the long amount needs the room. */}
+            <Fact
+              label="Target"
+              value={money(project.targetAmount)}
+              className="order-first col-span-2 sm:order-none sm:col-span-1"
+            />
             <Fact label="Days left" value={String(daysLeft(project.endDate))} />
           </div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-2 gap-3">
             <Fact label="From" value={money(project.minStakeUsd)} />
             <Fact label="Illustrated yield" value={`${project.expectedYield}%`} />
           </div>
@@ -115,9 +121,17 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
   );
 }
 
-function Fact({ label, value }: { label: string; value: string }) {
+function Fact({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: string;
+  className?: string;
+}) {
   return (
-    <div className="dash-card px-4 py-3">
+    <div className={cn("dash-card px-4 py-3", className)}>
       <p className="font-sans text-[12px] text-cream/45">{label}</p>
       <p className="mt-1 font-sans text-[18px] text-cream">{value}</p>
     </div>

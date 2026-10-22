@@ -12,7 +12,7 @@ import { ROLE_COOKIE } from "./types";
 
 const STORAGE_KEY = "chesstate_dashboard_v3";
 
-function seed(role: UserRole): DashboardState {
+export function seed(role: UserRole): DashboardState {
   return {
     profile: {
       id: "preview-user",
@@ -103,7 +103,7 @@ export function addFunds(amountUsd: number, method: PaymentMethod) {
   state.activity.unshift({
     id: `act_${Date.now().toString(36)}`,
     label: "Added funds",
-    detail: method === "apple_pay" ? "Apple Pay" : method === "bank" ? "Bank transfer" : "Card",
+    detail: methodLabel(method),
     amountUsd,
     at: new Date().toISOString(),
   });
@@ -156,6 +156,7 @@ export function setRoleCookie(role: UserRole) {
 
 function methodLabel(method: PaymentMethod) {
   if (method === "apple_pay") return "Apple Pay";
+  if (method === "google_pay") return "Google Pay";
   if (method === "bank") return "Bank transfer";
   return "Card";
 }

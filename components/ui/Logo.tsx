@@ -5,9 +5,12 @@ import { cn } from "@/lib/cn";
 export function Logo({
   className,
   tone = "navy",
+  compact = false,
 }: {
   className?: string;
   tone?: "navy" | "light";
+  /** Hides the wordmark below `sm`, for tight mobile bars. */
+  compact?: boolean;
 }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
@@ -23,6 +26,7 @@ export function Logo({
         className={cn(
           "font-sans text-[18px] font-semibold tracking-[-0.01em] sm:text-[19px]",
           tone === "navy" ? "text-navy" : "text-white",
+          compact && "hidden sm:inline",
         )}
       >
         ChesState

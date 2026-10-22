@@ -6,7 +6,7 @@ import { loadContact } from "@/lib/dashboard/contact";
 import { formatShortDate, money } from "@/lib/dashboard/types";
 
 export function LocalActions() {
-  const [events, setEvents] = useState(readLocalEvents());
+  const [events, setEvents] = useState<ReturnType<typeof readLocalEvents>>([]);
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {

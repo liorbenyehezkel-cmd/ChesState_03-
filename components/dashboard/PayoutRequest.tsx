@@ -1,5 +1,6 @@
 "use client";
 
+import { sendCustomerService } from "@/lib/dashboard/support";
 import { useState, type FormEvent } from "react";
 import { useDashboard } from "@/components/dashboard/DashboardProvider";
 
@@ -7,8 +8,10 @@ export function PayoutRequest() {
   const { state } = useDashboard();
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
 
-  function submit(event: FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
     const tickets = JSON.parse(localStorage.getItem("chesstate_support") ?? "[]") as unknown[];
     tickets.unshift({
@@ -18,6 +21,22 @@ export function PayoutRequest() {
       email: state.profile.email,
     });
     localStorage.setItem("chesstate_support", JSON.stringify(tickets.slice(0, 20)));
+    setSending(true);
+    setError("");
+    const result = await sendCustomerService({
+      message: `[Project upload] ${message.trim()}`,
+      topic: "project-upload",
+      profileEmail: state.profile.email,
+    });
+    setSending(false);
+    if (!result.ok) {
+      setError(
+        result.error === "missing_email"
+          ? "Add your email on the join list first so we can reply."
+          : "We could not send this to customer service. Please try again.",
+      );
+      return;
+    }
     setSent(true);
     setMessage("");
   }
@@ -54,11 +73,17 @@ export function PayoutRequest() {
                 className="mt-2 w-full rounded-2xl border border-cream/20 bg-cream/[0.04] px-4 py-3 text-cream"
               />
             </label>
+            {error && (
+              <p role="alert" className="font-sans text-[13px] text-[#F3B0A8]">
+                {error}
+              </p>
+            )}
             <button
               type="submit"
-              className="min-h-[44px] rounded-full bg-cream px-6 font-sans text-[15px] font-medium text-navy"
+              disabled={sending}
+              className="min-h-[44px] rounded-full bg-cream px-6 font-sans text-[15px] font-medium text-navy disabled:opacity-60"
             >
-              Write to customer service
+              {sending ? "Sending…" : "Write to customer service"}
             </button>
           </form>
         )}

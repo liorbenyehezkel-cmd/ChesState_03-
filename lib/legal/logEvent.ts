@@ -5,7 +5,8 @@ export type PlatformEventType =
   | "entrepreneur_signup"
   | "investment_request"
   | "payout_request"
-  | "product_feedback";
+  | "product_feedback"
+  | "customer_service";
 
 export async function logPlatformEvent(input: {
   type: PlatformEventType;
@@ -13,7 +14,11 @@ export async function logPlatformEvent(input: {
   detail?: Record<string, unknown>;
 }) {
   const email = typeof input.email === "string" ? input.email : null;
-  if (!email || input.type === "waitlist_join") return;
+  if (input.type === "waitlist_join") return { stored: false as const, error: "skipped" };
+  if (!email) {
+    console.warn("[events] dropped: no email for", input.type);
+    return { stored: false as const, error: "missing_email" };
+  }
 
   const detail = input.detail ?? {};
   const amount = detail.amountUsd;
@@ -24,7 +29,7 @@ export async function logPlatformEvent(input: {
         ? Number(amount)
         : null;
 
-  await saveRegistration({
+  const saved = await saveRegistration({
     email,
     phone: typeof detail.phone === "string" ? detail.phone : null,
     country: typeof detail.country === "string" ? detail.country : null,
@@ -34,4 +39,11 @@ export async function logPlatformEvent(input: {
     projectTitle: typeof detail.projectTitle === "string" ? detail.projectTitle : null,
     message: typeof detail.message === "string" ? detail.message : null,
   });
+
+  if (!saved.stored) {
+    console.error("[events] save failed:", input.type, saved.error, saved.detail);
+  } else {
+    console.log("[events] saved:", input.type, email);
+  }
+  return saved;
 }

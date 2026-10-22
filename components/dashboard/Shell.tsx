@@ -44,7 +44,7 @@ export function Shell({ children }: { children: ReactNode }) {
             href={isEntrepreneur ? "/dashboard/studio" : "/dashboard/explore"}
             prefetch={false}
           >
-            <Logo tone={isEntrepreneur ? "navy" : "light"} />
+            <Logo tone={isEntrepreneur ? "navy" : "light"} compact />
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">

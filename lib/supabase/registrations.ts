@@ -1,6 +1,7 @@
 import { createAdminSupabase, createPublicSupabase } from "@/lib/supabase/server";
+import { REGISTRATIONS_TABLE } from "@/lib/supabase/tables";
 
-export const REGISTRATIONS_TABLE = "registrations";
+export { REGISTRATIONS_TABLE };
 
 export type RegistrationInput = {
   email: string;
@@ -48,6 +49,61 @@ function rlsBlocked(message: string, code?: string) {
   return code === "42501" || /row-level security/i.test(message);
 }
 
+/**
+ * The anon key is insert-only, so an existing row is updated with the server
+ * key. Messages are appended (newest last) so earlier ones are not lost;
+ * purchase intent is only ever switched on, never off.
+ */
+async function mergeIntoExisting(input: RegistrationInput) {
+  const admin = createAdminSupabase();
+  if (!admin) return { ok: false as const, error: "duplicate_admin_key_missing" };
+
+  const email = input.email.toLowerCase().trim();
+  const { data: existing, error: findError } = await admin
+    .from(REGISTRATIONS_TABLE)
+    .select("*")
+    .ilike("email", email)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (findError || !existing) {
+    return { ok: false as const, error: findError?.message ?? "duplicate_not_found" };
+  }
+
+  const patch: Record<string, unknown> = {};
+  const fill = (column: string, value: unknown) => {
+    if (value != null && value !== "" && existing[column] == null) patch[column] = value;
+  };
+  fill("phone", input.phone);
+  fill("country", input.country);
+  fill("source", input.source);
+  fill("locale", input.locale);
+  if (input.tryToPurchase) {
+    patch.try_to_make_a_purchase = true;
+    if (input.purchaseAmount != null) patch.purchase_amount = input.purchaseAmount;
+    if (input.projectTitle) patch.project_title = input.projectTitle;
+  } else {
+    fill("project_title", input.projectTitle);
+  }
+  if (input.message) {
+    patch.message = existing.message
+      ? `${existing.message}
+${input.message}`
+      : input.message;
+  }
+  if (Object.keys(patch).length === 0) return { ok: true as const, error: null };
+
+  const { error } = await admin
+    .from(REGISTRATIONS_TABLE)
+    .update(patch)
+    .eq("id", existing.id);
+  if (error) {
+    console.error("[registrations] merge failed:", error.message);
+    return { ok: false as const, error: error.message };
+  }
+  return { ok: true as const, error: null };
+}
+
 export async function saveRegistration(input: RegistrationInput) {
   const supabase = createPublicSupabase();
   if (!supabase) return { stored: false as const, error: "not_configured", detail: null };
@@ -55,6 +111,13 @@ export async function saveRegistration(input: RegistrationInput) {
   let result = await supabase.from(REGISTRATIONS_TABLE).insert(fullRow(input));
   if (result.error && missingColumn(result.error.message)) {
     result = await supabase.from(REGISTRATIONS_TABLE).insert(coreRow(input));
+  }
+
+  if (result.error?.code === "23505") {
+    // Email already registered: fold the new data into the existing row.
+    const merged = await mergeIntoExisting(input);
+    if (merged.ok) return { stored: true as const, error: null, detail: null };
+    return { stored: false as const, error: merged.error, detail: null };
   }
 
   if (result.error) {

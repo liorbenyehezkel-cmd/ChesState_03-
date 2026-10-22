@@ -8,7 +8,7 @@ export type CampaignStatus = "draft" | "live" | "funded" | "failed" | "refunding
 
 export type InvestmentStatus = "pending" | "locked" | "confirmed" | "refunded";
 
-export type PaymentMethod = "card" | "apple_pay" | "bank";
+export type PaymentMethod = "card" | "apple_pay" | "google_pay" | "bank";
 
 export type Profile = {
   id: string;

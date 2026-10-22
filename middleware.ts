@@ -16,8 +16,42 @@ export async function middleware(request: NextRequest) {
   }
 }
 
+/**
+ * The operator pages show registrants' contact details, so they sit behind
+ * HTTP Basic Auth (any username, password = ADMIN_PASSWORD). With no password
+ * configured they stay locked rather than open.
+ */
+function adminAuthorized(request: NextRequest) {
+  const expected = process.env.ADMIN_PASSWORD;
+  if (!expected) return false;
+  const header = request.headers.get("authorization") ?? "";
+  if (!header.startsWith("Basic ")) return false;
+  let decoded = "";
+  try {
+    decoded = atob(header.slice(6));
+  } catch {
+    return false;
+  }
+  const given = decoded.slice(decoded.indexOf(":") + 1);
+  // Constant-time comparison so response timing does not leak the password.
+  let diff = given.length ^ expected.length;
+  for (let i = 0; i < expected.length; i++) {
+    diff |= expected.charCodeAt(i) ^ (given.charCodeAt(i) || 0);
+  }
+  return diff === 0;
+}
+
 async function handle(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    if (!adminAuthorized(request)) {
+      return new NextResponse("Authentication required", {
+        status: 401,
+        headers: { "WWW-Authenticate": 'Basic realm="ChesState admin", charset="UTF-8"' },
+      });
+    }
+  }
 
   if (
     gatedPrefixes.some((prefix) => pathname.startsWith(prefix)) &&

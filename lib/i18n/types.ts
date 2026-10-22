@@ -67,6 +67,12 @@ export type Dictionary = {
     noWallet: string;
     vara: string;
   };
+  explainer: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    videoLabel: string;
+  };
   howItWorks: {
     eyebrow: string;
     title: string;

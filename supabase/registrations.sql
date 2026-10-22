@@ -11,6 +11,11 @@ alter table public.registrations
   add column if not exists project_title text,
   add column if not exists message text;
 
+-- Support / feedback messages only carry an email, so contact details must be optional.
+alter table public.registrations
+  alter column phone drop not null,
+  alter column country drop not null;
+
 alter table public.registrations enable row level security;
 
 -- Remove previous open policies (data is not touched).

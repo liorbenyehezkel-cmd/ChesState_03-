@@ -76,7 +76,7 @@ export function InvestFlow({ project }: { project: Project }) {
       type: "product_feedback",
       email: contact?.email ?? null,
       detail: {
-        message,
+        message: `[Investment feedback] ${message}`,
         projectId: project.id,
         projectTitle: project.title,
         amountUsd: Number.isFinite(numeric) ? numeric : null,
@@ -197,6 +197,7 @@ export function InvestFlow({ project }: { project: Project }) {
               [
                 ["card", "Credit card"],
                 ["apple_pay", "Apple Pay"],
+                ["google_pay", "Google Pay"],
                 ["bank", "Bank transfer"],
               ] as const
             ).map(([value, label]) => (

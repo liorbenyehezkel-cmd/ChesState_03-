@@ -41,7 +41,7 @@ export function Navbar() {
         className="relative section-shell flex h-[72px] items-center justify-between gap-4"
       >
         <Link href="/" prefetch={false} aria-label={t.nav.home}>
-          <Logo />
+          <Logo compact />
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-5">
@@ -68,7 +68,8 @@ export function Navbar() {
             ))}
           </ul>
 
-          <LanguageSwitcher />
+          <LanguageSwitcher compact className="sm:hidden" />
+          <LanguageSwitcher className="hidden sm:block" />
 
           <Button size="sm" onClick={open}>
             {t.nav.registerInterest}

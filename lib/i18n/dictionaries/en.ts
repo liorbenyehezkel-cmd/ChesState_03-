@@ -41,6 +41,13 @@ export const en: Dictionary = {
     noWallet: "No crypto wallet required",
     vara: "Built for the UAE's VARA framework",
   },
+  explainer: {
+    eyebrow: "Watch",
+    title: "ChesState in under 3 minutes",
+    subtitle:
+      "See who we are, how the platform works, and how you can start investing in real estate from $9.99.",
+    videoLabel: "ChesState explainer video",
+  },
   howItWorks: {
     eyebrow: "How it works",
     title: "Tired of the old real estate game.",

@@ -1,5 +1,6 @@
 "use client";
 
+import { sendCustomerService } from "@/lib/dashboard/support";
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -38,12 +39,22 @@ function apply(prefs: A11y) {
   root.dataset.a11yFont = prefs.readable ? "readable" : "off";
 }
 
+const TOPIC_LABELS: Record<string, string> = {
+  account: "Account",
+  payment: "Payments",
+  project: "A project",
+  access: "Accessibility",
+  other: "Something else",
+};
+
 export function SettingsPanel() {
   const { role, state } = useDashboard();
   const [prefs, setPrefs] = useState<A11y>(defaults);
   const [topic, setTopic] = useState("account");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [notify, setNotify] = useState(true);
 
   useEffect(() => {
@@ -67,11 +78,27 @@ export function SettingsPanel() {
     localStorage.setItem(KEY, JSON.stringify(next));
   }
 
-  function submitSupport(event: FormEvent) {
+  async function submitSupport(event: FormEvent) {
     event.preventDefault();
     const tickets = JSON.parse(localStorage.getItem("chesstate_support") ?? "[]") as unknown[];
     tickets.unshift({ topic, message, at: new Date().toISOString(), email: state.profile.email });
     localStorage.setItem("chesstate_support", JSON.stringify(tickets.slice(0, 20)));
+    setSending(true);
+    setError("");
+    const result = await sendCustomerService({
+      message: `[${TOPIC_LABELS[topic] ?? topic}] ${message.trim()}`,
+      topic,
+      profileEmail: state.profile.email,
+    });
+    setSending(false);
+    if (!result.ok) {
+      setError(
+        result.error === "missing_email"
+          ? "Add your email on the join list first so we can reply."
+          : "We could not send this to customer service. Please try again.",
+      );
+      return;
+    }
     setSent(true);
     setMessage("");
   }
@@ -190,11 +217,17 @@ export function SettingsPanel() {
                 className="mt-2 w-full rounded-2xl border border-cream/20 bg-cream/[0.04] px-4 py-3 text-cream"
               />
             </label>
+            {error && (
+            <p role="alert" className="font-sans text-[13px] text-[#F3B0A8]">
+            {error}
+            </p>
+            )}
             <button
               type="submit"
-              className="min-h-[44px] rounded-full bg-cream px-6 font-sans text-[15px] font-medium text-navy"
+              disabled={sending}
+              className="min-h-[44px] rounded-full bg-cream px-6 font-sans text-[15px] font-medium text-navy disabled:opacity-60"
             >
-              Send
+              {sending ? "Sending…" : "Send"}
             </button>
           </form>
         )}

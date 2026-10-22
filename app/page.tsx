@@ -1,4 +1,5 @@
 import { FaqAccordion } from "@/components/FaqAccordion";
+import { ExplainerVideo } from "@/components/ExplainerVideo";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
@@ -13,6 +14,7 @@ export default function HomePage() {
       <main>
         <Hero />
         <TrustBar />
+        <ExplainerVideo />
         <HowItWorks />
         <FaqAccordion />
       </main>

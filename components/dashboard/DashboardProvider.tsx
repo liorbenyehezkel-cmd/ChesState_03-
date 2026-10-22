@@ -14,6 +14,7 @@ import {
   addFunds,
   recordInvestment,
   recordPayout,
+  seed,
   setRoleCookie,
   submitKyc,
 } from "@/lib/dashboard/store";
@@ -55,7 +56,9 @@ export function DashboardProvider({
   children: ReactNode;
 }) {
   const [role, setRoleState] = useState<UserRole>(initialRole);
-  const [state, setState] = useState(() => loadDashboard(initialRole));
+  // Start from the seed so server and client render the same markup;
+  // the effect below loads the saved state from localStorage after mount.
+  const [state, setState] = useState(() => seed(initialRole));
 
   useEffect(() => {
     setState(loadDashboard(role));

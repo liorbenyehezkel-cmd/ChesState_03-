@@ -42,6 +42,13 @@ export const es: Dictionary = {
     noWallet: "No se necesita monedero cripto",
     vara: "Diseñado para el marco VARA de los EAU",
   },
+  explainer: {
+    eyebrow: "Mira",
+    title: "ChesState en menos de 3 minutos",
+    subtitle:
+      "Descubre quiénes somos, cómo funciona la plataforma y cómo empezar a invertir en inmuebles desde 9,99 $.",
+    videoLabel: "Video explicativo de ChesState",
+  },
   howItWorks: {
     eyebrow: "Cómo funciona",
     title: "Cansado del viejo juego inmobiliario.",

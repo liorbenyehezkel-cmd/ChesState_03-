@@ -41,6 +41,13 @@ export const ar: Dictionary = {
     noWallet: "لا حاجة إلى محفظة عملات رقمية",
     vara: "مصمَّمة وفق إطار VARA في الإمارات",
   },
+  explainer: {
+    eyebrow: "شاهد",
+    title: "ChesState في أقل من 3 دقائق",
+    subtitle:
+      "تعرّف على من نحن، وكيف تعمل المنصة، وكيف تبدأ الاستثمار في العقارات بدءاً من 9.99 دولار.",
+    videoLabel: "فيديو تعريفي عن ChesState",
+  },
   howItWorks: {
     eyebrow: "كيف تعمل",
     title: "سئمت من لعبة العقارات القديمة.",

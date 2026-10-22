@@ -22,7 +22,6 @@ export function JoinListModal({
   const [phone, setPhone] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
-  const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();
@@ -98,7 +97,6 @@ export function JoinListModal({
     }
 
     setStatus("submitting");
-    setErrorDetail(null);
 
     try {
       const attribution = captureAttribution();
@@ -120,10 +118,6 @@ export function JoinListModal({
           statusText: response.statusText,
           body: result,
         });
-        // TEMPORARY DIAGNOSTIC: show the real reason on screen.
-        setErrorDetail(
-          `${response.status}: ${result?.error ?? response.statusText ?? "no response body"}`,
-        );
         throw new Error(`Request failed (${response.status})`);
       }
       if (result?.stored === false) {
@@ -147,7 +141,6 @@ export function JoinListModal({
       window.location.assign("/dashboard/explore");
     } catch (error) {
       console.error("[join-list] submit error:", error);
-      setErrorDetail((current) => current ?? String(error));
       setStatus("error");
     }
   }
@@ -325,11 +318,6 @@ export function JoinListModal({
                   {status === "error" && (
                     <p role="alert" className="mt-3 text-sm text-[#B3261E]">
                       {t.modal.error}
-                      {errorDetail && (
-                        <span className="mt-1 block break-words font-mono text-[12px]">
-                          {errorDetail}
-                        </span>
-                      )}
                     </p>
                   )}
 
