@@ -151,3 +151,23 @@ export async function listRegistrations(limit = 500) {
     error: error?.message ?? null,
   };
 }
+
+export async function deleteRegistration(id: string) {
+  const supabase = createAdminSupabase();
+  if (!supabase) return { ok: false as const, error: "admin_key_missing" };
+
+  const { data, error } = await supabase
+    .from(REGISTRATIONS_TABLE)
+    .delete()
+    .eq("id", id)
+    .select("id");
+  if (error) {
+    console.error("[registrations] delete failed:", error.message);
+    return { ok: false as const, error: error.message };
+  }
+  // Supabase reports success even when nothing matched, so check the result.
+  if (!data || data.length === 0) {
+    return { ok: false as const, error: "Registrant not found (already removed?)" };
+  }
+  return { ok: true as const, error: null };
+}
