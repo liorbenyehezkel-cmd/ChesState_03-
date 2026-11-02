@@ -13,7 +13,11 @@ export function isAdminAuthorization(header: string | null | undefined) {
   if (!value.startsWith("Basic ")) return false;
   let decoded = "";
   try {
-    decoded = atob(value.slice(6));
+    // Browsers send Basic credentials as UTF-8 (the realm says charset="UTF-8"),
+    // so decode the bytes properly; plain atob() breaks non-ASCII passwords.
+    const binary = atob(value.slice(6));
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
     return false;
   }
