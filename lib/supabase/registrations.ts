@@ -151,3 +151,15 @@ export async function listRegistrations(limit = 500) {
     error: error?.message ?? null,
   };
 }
+
+export async function deleteRegistration(id: string) {
+  const supabase = createAdminSupabase();
+  if (!supabase) return { ok: false as const, error: "admin_key_missing" };
+
+  const { error } = await supabase.from(REGISTRATIONS_TABLE).delete().eq("id", id);
+  if (error) {
+    console.error("[registrations] delete failed:", error.message);
+    return { ok: false as const, error: error.message };
+  }
+  return { ok: true as const, error: null };
+}

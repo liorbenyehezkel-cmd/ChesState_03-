@@ -1,5 +1,6 @@
 import { LiveRegistrations } from "@/components/admin/LiveRegistrations";
 import { LocalActions } from "@/components/admin/LocalActions";
+import { RemoveRegistrantButton } from "@/components/admin/RemoveRegistrantButton";
 import { listRegistrations } from "@/lib/supabase/registrations";
 import Link from "next/link";
 
@@ -42,10 +43,12 @@ function Table({
   title,
   rows,
   columns,
+  removable = false,
 }: {
   title: string;
   rows: Row[];
   columns: Column[];
+  removable?: boolean;
 }) {
   return (
     <section className="dash-card overflow-x-auto p-5">
@@ -64,6 +67,7 @@ function Table({
                   {col.label}
                 </th>
               ))}
+              {removable ? <th className="px-3 py-2" aria-label="Actions" /> : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-cream/10">
@@ -79,6 +83,16 @@ function Table({
                     {cell(row[col.key])}
                   </td>
                 ))}
+                {removable && row.id != null ? (
+                  <td className="px-3 py-2 text-end">
+                    <RemoveRegistrantButton
+                      id={String(row.id)}
+                      label={asText(row.email) || "this registrant"}
+                    />
+                  </td>
+                ) : removable ? (
+                  <td />
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -148,6 +162,7 @@ export default async function RegistrantsPage() {
         <Table
           title="Registrations"
           rows={records}
+          removable={!live.error}
           columns={[
             { key: "email", label: "Email" },
             { key: "phone", label: "Phone" },
